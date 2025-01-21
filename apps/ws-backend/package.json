@@ -10,11 +10,17 @@
   },
   "keywords": [],
   "author": "",
+
   "license": "ISC",
   "description": "",
-  "dependencies": {
+  "devDependencies": {
+    "@repo/backend-common": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.0",
+    "@repo/common": "workspace:*"
+  },
+  "dependencies": {
+   
     "@types/jsonwebtoken": "^9.0.7",
     "@types/ws": "^8.5.13",
     "express": "^4.21.2",
