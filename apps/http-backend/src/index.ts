@@ -5,9 +5,12 @@ import { middleware } from "./middleware";
 import {CreateUser,SigninSchema,CreateRoomSchema} from "@repo/common/types"
 import {prismaClient} from "@repo/db/client"
  const app=express();
- app.post("/signup",async (req,res)=>{
-    const parsedData=CreateUser.safeParse(req.body);
+ app.use(express.json());
 
+ app.post("/signup",async (req,res)=>{
+    console.log(req.body)
+    const parsedData=CreateUser.safeParse(req.body);
+    
     if(!parsedData.success){
         console.log(parsedData)
      res.json({
@@ -21,6 +24,7 @@ import {prismaClient} from "@repo/db/client"
     data : {
 
         email:parsedData.data?.username,
+        //TODO hash password
         password:parsedData.data.password,
         name:parsedData.data.name
 
@@ -39,16 +43,60 @@ catch(e){
 }
 
  })
- app.post("/signin",(req,res)=>{
-    const userId=1;
+ app.post("/signin",async (req,res)=>{
+    const parsedData=SigninSchema.parse(req.body);
+    if(!parsedData){
+        res.json({
+            message:"request body is not valid"
+        })
+        return
+    }
+ const user=await prismaClient.user.findFirst({
+    where:{
+        email:parsedData.username,
+        password:parsedData.password
+
+    }
+ })
+ if(!user){
+    res.json({
+        message:"invalid credentials"
+    })
+    return 
+ }
     const token=jwt.sign({
-        userId
+        userId:user?.id
     },JWT_SECRET)
      res.json({
         token
      })
  })
- app.post("/room",middleware,(req,res)=>{
+ app.post("/room",middleware,async (req,res)=>{
+    const parsedData=CreateRoomSchema.parse(req.body);
+    if(!parsedData){
+        res.json({
+            message:"request body is not valid"
+        })
+        return;
+    }
+    const userId=req.userId||"";
+    
+  try { const room = await prismaClient.room.create({
+        data:{
+            slug:parsedData.name,
+            adminId:userId
+        }
+    })
+    res.json({
+        roomId:room.id
+    })
+}
+catch(e){
+    res.json({
+        message:"room already exists"
+    })
+}
+
 
  })
  app.listen(3001)
