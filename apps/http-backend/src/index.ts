@@ -99,4 +99,39 @@ catch(e){
 
 
  })
+ app.get("/chats/:roomId",middleware,async(req,res)=>{
+    const roomId=Number(req.params.roomId);
+    const chat=await prismaClient.chat.findMany({
+        where:{
+            roomId:roomId
+        },
+        orderBy:{
+            id:"desc"
+        },
+        take:50
+
+    })
+    res.json({
+        chat
+    })
+ })
+ app.get("room/:slug",middleware,async(req,res)=>{
+    const slug=req.params.slug;
+    const room =await prismaClient.room.findFirst({
+      where:{
+        slug
+      }
+    })
+    if(!room){
+        res.json({
+            message:"incorrect slug "
+        })
+        return
+    }
+    const roomId=room.id
+    
+    res.json({
+        roomId
+    })
+ })
  app.listen(3001)
