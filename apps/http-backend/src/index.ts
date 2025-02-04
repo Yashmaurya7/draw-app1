@@ -75,7 +75,7 @@ catch(e){
     const parsedData=CreateRoomSchema.parse(req.body);
     if(!parsedData){
         res.json({
-            message:"request body is not valid"
+            message:"request body is invalid"
         })
         return;
     }
